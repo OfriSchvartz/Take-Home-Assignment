@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Login from './Login'
 import Feed from './Feed'
+import './App.css'
 
 function App() {
   const [token, setToken] = useState(() => sessionStorage.getItem('token'))

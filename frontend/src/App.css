@@ -86,3 +86,11 @@ p[role="alert"] {
   color: #dc2626;
   text-align: center;
 }
+
+textarea {
+  width: 100%;
+  max-width: 100%;
+  min-height: 80px;
+  resize: none;
+  box-sizing: border-box;
+}

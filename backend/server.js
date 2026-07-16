@@ -42,7 +42,7 @@ app.post('/login', (req, res) => {
   const token = crypto.randomUUID();
   tokens.set(token, username);
 
-  return res.status(200).json({ token });
+  return res.status(200).json({ token, username });
 });
 
 app.get('/posts', authenticate, (req, res) => {

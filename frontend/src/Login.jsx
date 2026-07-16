@@ -23,6 +23,7 @@ function Login({ onLoginSuccess }) {
       if (res.status === 200) {
         const data = await res.json()
         sessionStorage.setItem('token', data.token)
+        sessionStorage.setItem('username', data.username)
         onLoginSuccess()
         return
       }

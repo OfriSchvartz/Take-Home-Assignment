@@ -59,7 +59,10 @@ function Feed({ token, username }) {
 
   async function handleSubmit(e) {
     e.preventDefault()
-    if (!text.trim()) return
+    if (!text.trim()) {
+      setError('Post cannot be empty.')
+      return
+    }
 
     try {
       const res = await fetch(`${API_URL}/posts`, {

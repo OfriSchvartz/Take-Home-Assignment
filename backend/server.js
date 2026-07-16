@@ -62,7 +62,7 @@ app.post('/posts', authenticate, (req, res) => {
     text,
     createdAt: new Date().toISOString(),
   };
-  posts.push(post);
+  posts.unshift(post);
 
   return res.status(201).json(post);
 });

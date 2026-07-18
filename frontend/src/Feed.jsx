@@ -128,16 +128,16 @@ function Feed({ token, username }) {
               <p>{post.text}</p>
               <small>{new Date(post.createdAt).toLocaleString()}</small>
               {post.author === username && (
-  <button
-    onClick={() => {
-      if (window.confirm('Delete this post?')) {
-        handleDelete(post.id)
-      }
-    }}
-  >
-    Delete
-  </button>
-)}
+                <button
+                  onClick={() => {
+                    if (window.confirm('Delete this post?')) {
+                    handleDelete(post.id)
+                    }
+                  }}
+                >
+                  Delete
+                </button>
+              )}
             </li>
           ))}
         </ul>

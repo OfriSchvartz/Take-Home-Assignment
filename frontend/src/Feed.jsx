@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 const API_URL = 'http://localhost:3000'
 
@@ -8,54 +8,55 @@ function Feed({ token, username }) {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
 
+  // Pure network call — no state, so it's safe to call from anywhere
+  // (the effect, handleSubmit, handleDelete) without upsetting the
+  // "don't call setState indirectly in an effect" lint rule.
+  const fetchPosts = useCallback(async () => {
+    const res = await fetch(`${API_URL}/posts`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    if (!res.ok) throw new Error('failed to load posts')
+    return res.json()
+  }, [token])
+
+  // Used by handleSubmit/handleDelete after a mutation — no staleness
+  // concerns there since they're triggered by direct user action, not
+  // by an effect that could re-fire mid-flight.
   async function loadPosts() {
     setLoading(true)
     try {
-      const res = await fetch(`${API_URL}/posts`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      if (res.ok) {
-        const data = await res.json()
-        setPosts(data)
-      } else {
-        setError('Could not load posts.')
-      }
+      const data = await fetchPosts()
+      setPosts(data)
     } catch {
-      setError('Could not reach the server.')
+      setError('Could not load posts.')
     } finally {
       setLoading(false)
     }
   }
 
+  // No synchronous setLoading(true) here: `loading` already starts `true`
+  // via useState, which covers the initial mount. We don't reset it on
+  // every re-run because `token` never actually changes while Feed is
+  // mounted (logging out unmounts Feed and renders Login instead) — so
+  // this effect only ever runs once, on mount.
   useEffect(() => {
-  let ignore = false
+    let ignore = false
 
-  async function fetchPosts() {
-    setLoading(true)
-    try {
-      const res = await fetch(`${API_URL}/posts`, {
-        headers: { Authorization: `Bearer ${token}` },
+    fetchPosts()
+      .then((data) => {
+        if (!ignore) setPosts(data)
       })
-      if (ignore) return
-      if (res.ok) {
-        const data = await res.json()
-        setPosts(data)
-      } else {
-        setError('Could not load posts.')
-      }
-    } catch {
-      if (!ignore) setError('Could not reach the server.')
-    } finally {
-      if (!ignore) setLoading(false)
+      .catch(() => {
+        if (!ignore) setError('Could not load posts.')
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false)
+      })
+
+    return () => {
+      ignore = true
     }
-  }
-
-  fetchPosts()
-
-  return () => {
-    ignore = true
-  }
-}, [token])
+  }, [token, fetchPosts])
 
   async function handleSubmit(e) {
     e.preventDefault()
